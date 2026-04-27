@@ -2,7 +2,7 @@ import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { join } from "node:path";
 import UsersSeed from "./01-users.seed";
-import { Seed } from "./seed.interface";
+import type { Seed } from "./seed.interface";
 
 const dbConfig = {
   type: "postgres" as const,
@@ -25,16 +25,6 @@ const seeds: Seed[] = [new UsersSeed()];
 async function runSeeds(): Promise<void> {
   console.log("\n  IDemos — Seed Runner\n");
 
-  const resetDs = new DataSource({
-    ...dbConfig,
-    synchronize: false,
-    entities: [],
-  });
-  await resetDs.initialize();
-  await resetDs.query(`DROP SCHEMA public CASCADE`);
-  await resetDs.query(`CREATE SCHEMA public`);
-  await resetDs.destroy();
-
   await DevDataSource.initialize();
   console.log("  Connected to database.\n");
 
@@ -46,7 +36,7 @@ async function runSeeds(): Promise<void> {
   console.log("\n  Seeds complete.\n");
 }
 
-runSeeds().catch((err: Error) => {
-  console.error("  Fatal:", err.message);
+runSeeds().catch((err: unknown) => {
+  console.error("  Fatal:", err);
   process.exit(1);
 });
